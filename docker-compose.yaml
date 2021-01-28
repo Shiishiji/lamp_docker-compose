@@ -1,0 +1,44 @@
+version: "3.3"
+
+services:
+        php:
+                build:
+                        context: .
+                        dockerfile: ./docker/php/Dockerfile
+                ports:
+                        - 9000:9000
+                networks:
+                        - backend
+                volumes:
+                        - app_data:/app
+        httpd:
+                build:
+                        context: .
+                        dockerfile: ./docker/httpd/Dockerfile
+                ports:
+                        - 6666:80
+                networks:
+                        - frontend
+                        - backend
+                depends_on:
+                        - php
+                volumes:
+                        - app_data:/app
+        db:
+                build:
+                        context: ./docker/db
+                command: --default-authentication-plugin=mysql_native_password
+                restart: always
+                networks:
+                        - backend
+                env_file: ./docker/db/.env
+                volumes:
+                        - database_data:/var/lib/mysql
+
+volumes:
+        app_data:
+        database_data:
+                
+networks:
+        frontend:
+        backend:
